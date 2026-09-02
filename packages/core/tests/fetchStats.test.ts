@@ -34,7 +34,19 @@ const user_stats: QueryUser<UserInfoQuery> = {
   repositoriesContributedTo: { totalCount: 61 },
   contributionsCollection: {
     contributionYears: [2022, 2024],
-    contributionCalendar: { totalContributions: 2420 },
+    contributionCalendar: {
+      totalContributions: 2420,
+      weeks: [
+        {
+          contributionDays: [
+            { contributionCount: 0, date: "2026-08-30" },
+            { contributionCount: 1, date: "2026-08-31" },
+            { contributionCount: 2, date: "2026-09-01" },
+            { contributionCount: 3, date: "2026-09-02" },
+          ],
+        },
+      ],
+    },
   },
   commits: {
     totalCommitContributions: 100,
@@ -205,6 +217,7 @@ const fetchStatsWith = ({
   include_discussions_answers = false,
   commits_year,
   include_contributions = false,
+  include_commit_streak = false,
   include_all_time_contribs = false,
   contribs_include_own_repos = false,
 }: {
@@ -215,6 +228,7 @@ const fetchStatsWith = ({
   include_discussions_answers?: boolean;
   commits_year?: number;
   include_contributions?: boolean;
+  include_commit_streak?: boolean;
   include_all_time_contribs?: boolean;
   contribs_include_own_repos?: boolean;
 }) =>
@@ -235,6 +249,7 @@ const fetchStatsWith = ({
     false,
     [],
     include_contributions,
+    include_commit_streak,
     include_all_time_contribs,
     contribs_include_own_repos,
   );
@@ -264,6 +279,7 @@ const expectedStats = (
   totalIssuesAuthored: 0,
   totalIssuesCommented: 0,
   totalContributions: 0,
+  currentCommitStreak: 0,
   rank: calculateRank({
     all_commits: false,
     commits: 100,
@@ -494,6 +510,12 @@ describe("Test fetchStats", () => {
     const stats = await fetchStatsWith({ include_contributions: true });
 
     expect(stats.totalContributions).toBe(2420);
+  });
+
+  it("should calculate the current commit streak when requested", async () => {
+    const stats = await fetchStatsWith({ include_commit_streak: true });
+
+    expect(stats.currentCommitStreak).toBe(3);
   });
 
   it("should return correct data when user don't have any pull requests", async () => {

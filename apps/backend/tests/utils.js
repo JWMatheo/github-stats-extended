@@ -10,6 +10,19 @@ export const data_stats = {
       repositoriesContributedTo: { totalCount: 51 },
       contributionsCollection: {
         contributionYears: [2022, 2024],
+        contributionCalendar: {
+          totalContributions: 2420,
+          weeks: [
+            {
+              contributionDays: [
+                { contributionCount: 0, date: "2026-08-30" },
+                { contributionCount: 1, date: "2026-08-31" },
+                { contributionCount: 2, date: "2026-09-01" },
+                { contributionCount: 3, date: "2026-09-02" },
+              ],
+            },
+          ],
+        },
       },
       commits: {
         totalCommitContributions: 200,

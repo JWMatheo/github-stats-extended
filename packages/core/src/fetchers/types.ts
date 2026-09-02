@@ -51,6 +51,7 @@ export interface StatsData {
   totalIssuesAuthored: number;
   totalIssuesCommented: number;
   totalContributions: number;
+  currentCommitStreak: number;
   rank: { level: string; percentile: number };
 }
 

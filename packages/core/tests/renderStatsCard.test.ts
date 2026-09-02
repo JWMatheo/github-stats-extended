@@ -27,6 +27,7 @@ const stats: StatsData = {
   totalIssuesAuthored: 100,
   totalIssuesCommented: 100,
   totalContributions: 5000,
+  currentCommitStreak: 57,
   rank: { level: "A+", percentile: 40 },
 };
 
@@ -58,6 +59,7 @@ describe("Test renderStatsCard", () => {
       screen.queryByTestId("prs_merged_percentage"),
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId("contributions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("commit_streak")).not.toBeInTheDocument();
     expect(screen.queryByTestId("all_time_contribs")).not.toBeInTheDocument();
   });
 
@@ -130,6 +132,14 @@ describe("Test renderStatsCard", () => {
     });
 
     expect(screen.getByTestId("contributions").textContent).toBe("5k");
+  });
+
+  it("should show the current commit streak when included in show list", () => {
+    document.body.innerHTML = renderStatsCard(stats, {
+      show: ["commit_streak"],
+    });
+
+    expect(screen.getByTestId("commit_streak").textContent).toBe("57");
   });
 
   it("should show all_time_contribs stat when included in show list", () => {

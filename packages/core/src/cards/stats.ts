@@ -249,6 +249,7 @@ const renderStatsCard = (
     totalIssuesAuthored,
     totalIssuesCommented,
     totalContributions,
+    currentCommitStreak,
     rank,
   } = stats;
   const {
@@ -302,6 +303,15 @@ const renderStatsCard = (
       label: i18n.t("statcard.contributions"),
       value: totalContributions,
       id: "contributions",
+    };
+  }
+
+  if (show.includes("commit_streak")) {
+    STATS["commit_streak"] = {
+      icon: icons.commits,
+      label: "Current Commit Streak",
+      value: currentCommitStreak,
+      id: "commit_streak",
     };
   }
 

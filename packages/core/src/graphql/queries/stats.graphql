@@ -37,6 +37,7 @@ query userInfo(
   $includeMergedPullRequests: Boolean!
   $includeDiscussions: Boolean!
   $includeDiscussionsAnswers: Boolean!
+  $includeCommitStreak: Boolean!
   $startTime: DateTime = null
   $ownerAffiliations: [RepositoryAffiliation]
   $includeUserRepositories: Boolean!
@@ -84,6 +85,12 @@ query userInfo(
       contributionYears
       contributionCalendar {
         totalContributions
+        weeks @include(if: $includeCommitStreak) {
+          contributionDays {
+            contributionCount
+            date
+          }
+        }
       }
     }
     ...RepoStars

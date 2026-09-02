@@ -68,6 +68,23 @@ describe("Test /api contract", () => {
     }).toMatchSnapshot();
   });
 
+  it("should request and render the current commit streak", async () => {
+    const { default: router } = await import("../../router.js");
+
+    const req = {
+      headers: {},
+      url: "/api?username=anuraghazra&show=commit_streak",
+    };
+    const res = createResponse();
+
+    await router(req, res);
+
+    const request = JSON.parse(mock.history.post[0].data);
+    expect(request.variables.includeCommitStreak).toBe(true);
+    expect(res.end.mock.calls[0][0]).toContain('data-testid="commit_streak"');
+    expect(res.end.mock.calls[0][0]).toContain(">3</text>");
+  });
+
   it("should match the public many-params response snapshot", async () => {
     mock.onPost("https://api.github.com/graphql").reply(200, data_stats);
 

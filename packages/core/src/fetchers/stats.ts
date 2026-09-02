@@ -39,6 +39,40 @@ type StatsFetcherResponse = Pick<
   "data" | "statusText"
 >;
 
+interface ContributionWeek {
+  contributionDays: Array<{
+    contributionCount: number;
+    date: string;
+  }>;
+}
+
+/**
+ * Count consecutive contribution days ending today, with the usual one-day
+ * grace period when today's calendar cell is still empty.
+ *
+ * @param weeks GitHub contribution calendar weeks, ordered chronologically.
+ * @returns The current contribution streak in days.
+ */
+const calculateCurrentCommitStreak = (
+  weeks: Array<ContributionWeek>,
+): number => {
+  const days = weeks
+    .flatMap((week) => week.contributionDays)
+    .sort((left, right) => left.date.localeCompare(right.date));
+  let index = days.length - 1;
+
+  if (days[index]?.contributionCount === 0) {
+    index--;
+  }
+
+  let streak = 0;
+  while ((days[index]?.contributionCount ?? 0) > 0) {
+    streak++;
+    index--;
+  }
+  return streak;
+};
+
 const fetcher = createGraphQLFetcher(UserInfoDocument, "bearer");
 /** Fetcher for the pages after the first, which only need `repositories`. */
 const reposFetcher = createGraphQLFetcher(UserReposDocument, "bearer");
@@ -51,6 +85,7 @@ const reposFetcher = createGraphQLFetcher(UserReposDocument, "bearer");
  * @param variables.includeMergedPullRequests Include merged pull requests.
  * @param variables.includeDiscussions Include discussions.
  * @param variables.includeDiscussionsAnswers Include discussions answers.
+ * @param variables.includeCommitStreak Include daily contribution data for the current streak.
  * @param variables.startTime Time to start the count of total commits.
  * @param variables.ownerAffiliations The owner affiliations to filter by. Default: OWNER.
  * @param variables.includeUserRepositories Whether to include the user's own repositories in the repos contributed to.
@@ -65,6 +100,7 @@ const statsFetcher = async ({
   includeMergedPullRequests,
   includeDiscussions,
   includeDiscussionsAnswers,
+  includeCommitStreak,
   startTime,
   ownerAffiliations,
   includeUserRepositories,
@@ -74,6 +110,7 @@ const statsFetcher = async ({
   includeMergedPullRequests: boolean;
   includeDiscussions: boolean;
   includeDiscussionsAnswers: boolean;
+  includeCommitStreak: boolean;
   startTime: string | undefined;
   ownerAffiliations: UserInfoQueryVariables["ownerAffiliations"];
   includeUserRepositories: boolean;
@@ -88,6 +125,7 @@ const statsFetcher = async ({
       includeMergedPullRequests,
       includeDiscussions,
       includeDiscussionsAnswers,
+      includeCommitStreak,
       startTime,
       ownerAffiliations,
       includeUserRepositories,
@@ -460,6 +498,7 @@ const fetchAllTimeReposContributedTo = async (
  * @param ownerAffiliations Owner affiliations. Default: OWNER.
  * @param include_contributions Include contributions from GitHub's default
  * rolling contribution-calendar window.
+ * @param include_commit_streak Include the current consecutive contribution-day streak.
  * @param include_all_time_contribs Include all-time count of repos contributed to.
  * @param contribs_include_own_repos Include user-owned repos in contributed-to counts.
  * @param pat Optional PAT override.
@@ -482,6 +521,7 @@ const fetchStats = async (
   include_issues_commented = false,
   ownerAffiliations: Array<string> = [],
   include_contributions = false,
+  include_commit_streak = false,
   include_all_time_contribs = false,
   contribs_include_own_repos = false,
   pat: string | null = null,
@@ -509,6 +549,7 @@ const fetchStats = async (
     totalIssuesAuthored: 0,
     totalIssuesCommented: 0,
     totalContributions: 0,
+    currentCommitStreak: 0,
     rank: { level: "C", percentile: 100 },
   };
   const affiliations = parseOwnerAffiliations(ownerAffiliations);
@@ -518,6 +559,7 @@ const fetchStats = async (
     includeMergedPullRequests: include_merged_pull_requests,
     includeDiscussions: include_discussions,
     includeDiscussionsAnswers: include_discussions_answers,
+    includeCommitStreak: include_commit_streak,
     startTime:
       commits_year === undefined
         ? undefined
@@ -603,6 +645,12 @@ const fetchStats = async (
   if (include_contributions) {
     stats.totalContributions =
       user.contributionsCollection.contributionCalendar.totalContributions;
+  }
+
+  if (include_commit_streak) {
+    stats.currentCommitStreak = calculateCurrentCommitStreak(
+      user.contributionsCollection.contributionCalendar.weeks ?? [],
+    );
   }
 
   if (include_all_time_contribs) {

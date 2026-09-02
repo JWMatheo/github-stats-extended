@@ -121,6 +121,7 @@ export default async (
       showStats.includes("issues_commented"),
       parseArray(role),
       showStats.includes("contributions"),
+      showStats.includes("commit_streak"),
       showStats.includes("all_time_contribs"),
       parseBoolean(contribs_include_own_repos),
       pat,

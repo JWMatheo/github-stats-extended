@@ -41,6 +41,7 @@ export type UserInfoQueryVariables = Exact<{
   includeMergedPullRequests: boolean;
   includeDiscussions: boolean;
   includeDiscussionsAnswers: boolean;
+  includeCommitStreak: boolean;
   startTime?: string | null | undefined;
   ownerAffiliations?:
     | Array<Types.RepositoryAffiliation | null | undefined>
@@ -66,7 +67,12 @@ export type UserInfoQuery = {
     repositoryDiscussionComments?: { totalCount: number };
     contributionsCollection: {
       contributionYears: Array<number>;
-      contributionCalendar: { totalContributions: number };
+      contributionCalendar: {
+        totalContributions: number;
+        weeks?: Array<{
+          contributionDays: Array<{ contributionCount: number; date: string }>;
+        }>;
+      };
     };
     repositories: {
       totalCount: number;
@@ -130,7 +136,7 @@ export const UserInfoDocument = graphqlDocument<
   UserInfoQuery,
   UserInfoQueryVariables
 >(`
-query userInfo($login: String!, $after: String, $includeMergedPullRequests: Boolean!, $includeDiscussions: Boolean!, $includeDiscussionsAnswers: Boolean!, $startTime: DateTime = null, $ownerAffiliations: [RepositoryAffiliation], $includeUserRepositories: Boolean!) {
+query userInfo($login: String!, $after: String, $includeMergedPullRequests: Boolean!, $includeDiscussions: Boolean!, $includeDiscussionsAnswers: Boolean!, $includeCommitStreak: Boolean!, $startTime: DateTime = null, $ownerAffiliations: [RepositoryAffiliation], $includeUserRepositories: Boolean!) {
   user(login: $login) {
     name
     login
@@ -172,6 +178,12 @@ query userInfo($login: String!, $after: String, $includeMergedPullRequests: Bool
       contributionYears
       contributionCalendar {
         totalContributions
+        weeks @include(if: $includeCommitStreak) {
+          contributionDays {
+            contributionCount
+            date
+          }
+        }
       }
     }
     ...RepoStars
