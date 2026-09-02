@@ -72,7 +72,9 @@ function calculateRank({
     STARS_WEIGHT +
     FOLLOWERS_WEIGHT;
 
-  const THRESHOLDS = [1, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100];
+  // Personal-fork calibration: keep S exclusive while treating an activity
+  // percentile up to 40 as A+. The computed percentile itself is unchanged.
+  const THRESHOLDS = [1, 40, 43, 46, 50, 62.5, 75, 87.5, 100];
   const LEVELS = ["S", "A+", "A", "A-", "B+", "B", "B-", "C+", "C"];
 
   const rank =

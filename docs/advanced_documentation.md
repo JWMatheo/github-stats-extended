@@ -16,7 +16,7 @@
 > By default, the stats card only shows statistics like stars, commits, and pull requests from public repositories. To show private statistics on the stats card, [allow GitHub-Stats-Extended to access your private contributions](fork.md#private-contributions-support) or [deploy your own instance](deploy.md).
 
 > [!NOTE]
-> Available ranks are S (top 1%), A+ (12.5%), A (25%), A- (37.5%), B+ (50%), B (62.5%), B- (75%), C+ (87.5%) and C (everyone). This ranking scheme is based on the [Japanese academic grading](https://wikipedia.org/wiki/Academic_grading_in_Japan) system. The global percentile is calculated as a weighted sum of percentiles for each statistic (number of commits, pull requests, reviews, issues, stars, and followers), based on the cumulative distribution function of the [exponential](https://wikipedia.org/wiki/exponential_distribution) and the [log-normal](https://wikipedia.org/wiki/Log-normal_distribution) distributions. The implementation can be investigated at [calculateRank.ts](https://github.com/stats-organization/github-stats-extended/blob/master/packages/core/src/calculateRank.ts). The circle around the rank shows 100 minus the global percentile.
+> This personal fork keeps the upstream percentile formula but uses custom display thresholds: S (top 1%), A+ (40%), A (43%), A- (46%), B+ (50%), B (62.5%), B- (75%), C+ (87.5%) and C (everyone). The percentile is calculated as a weighted sum of commits, pull requests, reviews, issues, stars, and followers. The implementation is in [calculateRank.ts](https://github.com/JWMatheo/github-stats-extended/blob/master/packages/core/src/calculateRank.ts). The circle around the rank still shows 100 minus the unchanged percentile.
 
 ### Hiding individual stats
 

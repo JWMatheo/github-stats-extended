@@ -68,7 +68,7 @@ describe("Test calculateRank", () => {
     ).toStrictEqual({ level: "B+", percentile: approxNumber(46.09375) });
   });
 
-  it("advanced user gets A rank", () => {
+  it("advanced user gets A+ rank with the personal-fork calibration", () => {
     expect(
       calculateRank({
         all_commits: false,
@@ -81,7 +81,7 @@ describe("Test calculateRank", () => {
         followers: 40,
       }),
     ).toStrictEqual({
-      level: "A",
+      level: "A+",
       percentile: approxNumber(20.841471354166664),
     });
   });
