@@ -17,6 +17,7 @@ fragment TopLanguagesRepository on Repository {
 
 query topLanguages(
   $login: String!
+  $after: String
   $ownerAffiliations: [RepositoryAffiliation]
 ) {
   user(login: $login) {
@@ -25,9 +26,14 @@ query topLanguages(
       ownerAffiliations: $ownerAffiliations
       isFork: false
       first: 100
+      after: $after
     ) {
       nodes {
         ...TopLanguagesRepository
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }

@@ -22,6 +22,7 @@ export type TopLanguagesRepositoryFragment = {
 
 export type TopLanguagesQueryVariables = Exact<{
   login: string;
+  after?: string | null | undefined;
   ownerAffiliations?:
     | Array<Types.RepositoryAffiliation | null | undefined>
     | Types.RepositoryAffiliation
@@ -41,6 +42,7 @@ export type TopLanguagesQuery = {
           } | null> | null;
         } | null;
       } | null> | null;
+      pageInfo: { hasNextPage: boolean; endCursor: string | null };
     };
   } | null;
 };
@@ -49,11 +51,20 @@ export const TopLanguagesDocument = graphqlDocument<
   TopLanguagesQuery,
   TopLanguagesQueryVariables
 >(`
-query topLanguages($login: String!, $ownerAffiliations: [RepositoryAffiliation]) {
+query topLanguages($login: String!, $after: String, $ownerAffiliations: [RepositoryAffiliation]) {
   user(login: $login) {
-    repositories(ownerAffiliations: $ownerAffiliations, isFork: false, first: 100) {
+    repositories(
+      ownerAffiliations: $ownerAffiliations
+      isFork: false
+      first: 100
+      after: $after
+    ) {
       nodes {
         ...TopLanguagesRepository
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }

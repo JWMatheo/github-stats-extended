@@ -56,6 +56,7 @@ const data_langs = {
             },
           },
         ],
+        pageInfo: { hasNextPage: false, endCursor: null as string | null },
       },
     },
   },
@@ -131,6 +132,52 @@ describe("FetchTopLanguages", () => {
         size: 200,
       },
     });
+  });
+
+  it("should aggregate languages from every repository page", async () => {
+    const firstPage = structuredClone(data_langs);
+    firstPage.data.user.repositories.pageInfo = {
+      hasNextPage: true,
+      endCursor: "page-2",
+    };
+    const secondPage = {
+      data: {
+        user: {
+          repositories: {
+            nodes: [
+              {
+                name: "rust-repo",
+                languages: {
+                  edges: [
+                    { size: 300, node: { color: "#dea584", name: "Rust" } },
+                  ],
+                },
+              },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      },
+    };
+    mock
+      .onPost("https://api.github.com/graphql")
+      .replyOnce(200, firstPage)
+      .onPost("https://api.github.com/graphql")
+      .replyOnce(200, secondPage);
+
+    const languages = await fetchTopLanguages("anuraghazra");
+
+    expect(languages["Rust"]).toStrictEqual({
+      color: "#dea584",
+      count: 1,
+      name: "Rust",
+      size: 300,
+    });
+    expect(mock.history.post).toHaveLength(2);
+    const secondRequest = JSON.parse(mock.history.post[1]?.data as string) as {
+      variables: { after: string };
+    };
+    expect(secondRequest.variables.after).toBe("page-2");
   });
 
   it("should rank languages by the number of repositories they appear in", async () => {

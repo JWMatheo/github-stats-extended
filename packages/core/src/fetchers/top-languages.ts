@@ -43,6 +43,7 @@ const fetchTopLanguages = async (
     fetcher,
     {
       login: username,
+      after: null,
       ownerAffiliations: affiliations,
     },
     pat,
@@ -69,6 +70,37 @@ const fetchTopLanguages = async (
     );
   }
 
+  const allRepoNodes = [...(res.data.data.user?.repositories.nodes ?? [])];
+  let pageInfo = res.data.data.user?.repositories.pageInfo;
+  let previousCursor: string | null = null;
+
+  while (pageInfo?.hasNextPage) {
+    const after = pageInfo.endCursor;
+    if (after === null || after === previousCursor) {
+      break;
+    }
+    previousCursor = after;
+
+    const page = await retryer(
+      fetcher,
+      { login: username, after, ownerAffiliations: affiliations },
+      pat,
+    );
+    if (page.data.errors) {
+      logger.error(page.data.errors);
+      const firstError = page.data.errors[0];
+      throw new CustomError(
+        firstError?.message ||
+          "Something went wrong while trying to retrieve the language data using the GraphQL API.",
+        firstError?.message ? page.statusText : CustomError.GRAPHQL_ERROR,
+      );
+    }
+
+    const repositories = page.data.data.user?.repositories;
+    allRepoNodes.push(...(repositories?.nodes ?? []));
+    pageInfo = repositories?.pageInfo;
+  }
+
   const repoToHide: Record<string, boolean> = {};
   const allExcludedRepos = [
     ...exclude_repo,
@@ -81,7 +113,7 @@ const fetchTopLanguages = async (
   });
 
   // filter out repositories to be hidden
-  const repoNodes = (res.data.data.user?.repositories.nodes ?? []).filter(
+  const repoNodes = allRepoNodes.filter(
     (node): node is TopLanguagesRepositoryFragment =>
       !!node && !repoToHide[node.name],
   );
