@@ -33,7 +33,7 @@ You can pass a query parameter `&show=` to show any specific additional stats wi
 ```
 
 :::note
-[`contributions`](/frontend/docs/fork/#new-contributions-stat) counts contributions across all years.
+[`contributions`](/frontend/docs/fork/#new-contributions-stat) matches GitHub's rolling contribution-calendar count.
 [`all_time_contribs`](/frontend/docs/fork/#new-options-for-contributed-to-stats) counts repositories the user has contributed to across all years.
 The `contribs` stat under `&hide=` counts repositories the user has contributed to in the past year.
 :::

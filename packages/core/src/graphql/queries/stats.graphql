@@ -82,6 +82,9 @@ query userInfo(
     }
     contributionsCollection {
       contributionYears
+      contributionCalendar {
+        totalContributions
+      }
     }
     ...RepoStars
   }

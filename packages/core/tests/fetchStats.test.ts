@@ -7,7 +7,6 @@ import { loadConfigFromEnv } from "../src/common/config.js";
 import type { GraphQLResponse } from "../src/common/http.js";
 import { fetchStats } from "../src/fetchers/stats.js";
 import type { StatsData } from "../src/fetchers/types.js";
-import type { ContributionsQuery } from "../src/graphql/contributionsDocument.js";
 import type {
   RangeContributionsByRepoFragment,
   RepoStarsFragment,
@@ -35,6 +34,7 @@ const user_stats: QueryUser<UserInfoQuery> = {
   repositoriesContributedTo: { totalCount: 61 },
   contributionsCollection: {
     contributionYears: [2022, 2024],
+    contributionCalendar: { totalContributions: 2420 },
   },
   commits: {
     totalCommitContributions: 100,
@@ -142,15 +142,6 @@ const data_repo_zero_stars: GraphQLBody<UserReposQuery> = {
           endCursor: "cursor",
         },
       },
-    },
-  },
-};
-
-const data_contributions: GraphQLBody<ContributionsQuery> = {
-  data: {
-    user: {
-      year_2022: { contributionCalendar: { totalContributions: 150 } },
-      year_2024: { contributionCalendar: { totalContributions: 200 } },
     },
   },
 };
@@ -301,9 +292,6 @@ beforeEach(() => {
     }
     if (req.query.includes("userReposContributedTo")) {
       return [200, data_repos_contributed_to];
-    }
-    if (req.query.includes("contributionCalendar")) {
-      return [200, data_contributions];
     }
     if (req.query.includes("totalCommitContributions")) {
       return [
@@ -505,49 +493,7 @@ describe("Test fetchStats", () => {
   it("should fetch total contributions when include_contributions is true", async () => {
     const stats = await fetchStatsWith({ include_contributions: true });
 
-    expect(stats.totalContributions).toBe(350);
-  });
-
-  it("should throw when the contributions query returns an error", async () => {
-    mock.onPost("https://api.github.com/graphql").reply((cfg) => {
-      const req = JSON.parse(cfg.data as string) as { query: string };
-      if (req.query.includes("contributionCalendar")) {
-        return [
-          200,
-          {
-            data: null,
-            errors: [{ message: "Some test GraphQL error" }],
-          },
-        ];
-      }
-      return [
-        200,
-        req.query.includes("totalCommitContributions") ? data_stats : data_repo,
-      ];
-    });
-
-    await expect(
-      fetchStatsWith({ include_contributions: true }),
-    ).rejects.toThrow("Some test GraphQL error");
-  });
-
-  it("should throw a generic error when the contributions query returns an error without a message", async () => {
-    mock.onPost("https://api.github.com/graphql").reply((cfg) => {
-      const req = JSON.parse(cfg.data as string) as { query: string };
-      if (req.query.includes("contributionCalendar")) {
-        return [200, { data: null, errors: [{ type: "SOME_ERROR" }] }];
-      }
-      return [
-        200,
-        req.query.includes("totalCommitContributions") ? data_stats : data_repo,
-      ];
-    });
-
-    await expect(
-      fetchStatsWith({ include_contributions: true }),
-    ).rejects.toThrow(
-      "Something went wrong while trying to retrieve the contributions data using the GraphQL API.",
-    );
+    expect(stats.totalContributions).toBe(2420);
   });
 
   it("should return correct data when user don't have any pull requests", async () => {

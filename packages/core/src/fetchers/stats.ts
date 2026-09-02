@@ -17,7 +17,6 @@ import {
   parseOwnerAffiliations,
 } from "../common/ops.js";
 import { retryer } from "../common/retryer.js";
-import { buildContributionsDocument } from "../graphql/contributionsDocument.js";
 import {
   UserInfoDocument,
   UserReposDocument,
@@ -308,56 +307,6 @@ const graphqlError = (
     : new CustomError(fallback, CustomError.GRAPHQL_ERROR);
 };
 
-/**
- * Fetch all-time contributions by building a single GraphQL query
- * for all the given years.
- *
- * Whether private contributions are included depends on the user's profile settings:
- * https://docs.github.com/en/account-and-profile/how-tos/contribution-settings/manage-visibility-settings-for-private-contributions-and-achievements#changing-the-visibility-of-your-private-contributions
- */
-const fetchTotalContributions = async (
-  username: string,
-  years: Array<number>,
-  pat: string | null = null,
-): Promise<number> => {
-  if (years.length === 0) {
-    return 0;
-  }
-
-  const contributionsFetcher = createGraphQLFetcher(
-    buildContributionsDocument(years),
-    "bearer",
-  );
-
-  const contribRes = await retryer(
-    contributionsFetcher,
-    { login: username },
-    pat,
-  );
-
-  if (contribRes.data.errors) {
-    throw graphqlError(
-      contribRes.data.errors,
-      contribRes.statusText,
-      "Something went wrong while trying to retrieve the contributions data using the GraphQL API.",
-    );
-  }
-
-  const user = contribRes.data.data.user;
-  if (!user) {
-    return 0;
-  }
-
-  let total = 0;
-  for (const year of years) {
-    const yearBlock = user[`year_${year}`];
-    if (yearBlock?.contributionCalendar.totalContributions) {
-      total += yearBlock.contributionCalendar.totalContributions;
-    }
-  }
-  return total;
-};
-
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
@@ -509,7 +458,8 @@ const fetchAllTimeReposContributedTo = async (
  * @param include_issues_authored Include count of issues authored.
  * @param include_issues_commented Include count of issues commented.
  * @param ownerAffiliations Owner affiliations. Default: OWNER.
- * @param include_contributions Include all-time contributions.
+ * @param include_contributions Include contributions from GitHub's default
+ * rolling contribution-calendar window.
  * @param include_all_time_contribs Include all-time count of repos contributed to.
  * @param contribs_include_own_repos Include user-owned repos in contributed-to counts.
  * @param pat Optional PAT override.
@@ -651,11 +601,8 @@ const fetchStats = async (
   stats.contributedTo = user.repositoriesContributedTo.totalCount;
 
   if (include_contributions) {
-    stats.totalContributions = await fetchTotalContributions(
-      username,
-      user.contributionsCollection.contributionYears,
-      pat,
-    );
+    stats.totalContributions =
+      user.contributionsCollection.contributionCalendar.totalContributions;
   }
 
   if (include_all_time_contribs) {

@@ -64,7 +64,10 @@ export type UserInfoQuery = {
     followers: { totalCount: number };
     repositoryDiscussions?: { totalCount: number };
     repositoryDiscussionComments?: { totalCount: number };
-    contributionsCollection: { contributionYears: Array<number> };
+    contributionsCollection: {
+      contributionYears: Array<number>;
+      contributionCalendar: { totalContributions: number };
+    };
     repositories: {
       totalCount: number;
       nodes: Array<{ name: string; stargazerCount: number } | null> | null;
@@ -167,6 +170,9 @@ query userInfo($login: String!, $after: String, $includeMergedPullRequests: Bool
     }
     contributionsCollection {
       contributionYears
+      contributionCalendar {
+        totalContributions
+      }
     }
     ...RepoStars
   }
