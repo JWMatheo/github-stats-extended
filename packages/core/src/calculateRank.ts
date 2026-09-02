@@ -73,8 +73,9 @@ function calculateRank({
     FOLLOWERS_WEIGHT;
 
   // Personal-fork calibration: keep S exclusive while treating an activity
-  // percentile up to 40 as A+. The computed percentile itself is unchanged.
+  // percentile up to 40 as A+.
   const THRESHOLDS = [1, 40, 43, 46, 50, 62.5, 75, 87.5, 100];
+  const DISPLAY_THRESHOLDS = [1, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100];
   const LEVELS = ["S", "A+", "A", "A-", "B+", "B", "B-", "C+", "C"];
 
   const rank =
@@ -87,12 +88,34 @@ function calculateRank({
       FOLLOWERS_WEIGHT * log_normal_cdf(followers / FOLLOWERS_MEDIAN)) /
       TOTAL_WEIGHT;
 
-  const level = LEVELS[THRESHOLDS.findIndex((t) => rank * 100 <= t)];
-  if (level === undefined) {
+  const rawPercentile = rank * 100;
+  const levelIndex = THRESHOLDS.findIndex((t) => rawPercentile <= t);
+  const level = LEVELS[levelIndex];
+  const rawLowerBound = levelIndex === 0 ? 0 : THRESHOLDS[levelIndex - 1];
+  const rawUpperBound = THRESHOLDS[levelIndex];
+  const displayLowerBound =
+    levelIndex === 0 ? 0 : DISPLAY_THRESHOLDS[levelIndex - 1];
+  const displayUpperBound = DISPLAY_THRESHOLDS[levelIndex];
+  if (
+    level === undefined ||
+    rawLowerBound === undefined ||
+    rawUpperBound === undefined ||
+    displayLowerBound === undefined ||
+    displayUpperBound === undefined
+  ) {
     throw new Error("Unable to determine rank level");
   }
 
-  return { level, percentile: rank * 100 };
+  // The renderer fills the ring with `100 - percentile`. Remap the raw
+  // percentile inside its custom grade band to the equivalent canonical band,
+  // so the ring and the displayed grade communicate the same achievement.
+  const positionWithinGrade =
+    (rawPercentile - rawLowerBound) / (rawUpperBound - rawLowerBound);
+  const displayPercentile =
+    displayLowerBound +
+    positionWithinGrade * (displayUpperBound - displayLowerBound);
+
+  return { level, percentile: displayPercentile };
 }
 
 export { calculateRank };

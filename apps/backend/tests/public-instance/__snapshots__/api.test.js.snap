@@ -68,7 +68,7 @@ exports[`Test /api contract > should match the gradient-background response snap
         stroke-dashoffset: 251.32741228718345;
       }
       to {
-        stroke-dashoffset: 25.665014275610705;
+        stroke-dashoffset: 9.34006929611534;
       }
     }
   
@@ -130,7 +130,7 @@ exports[`Test /api contract > should match the gradient-background response snap
         stroke-dashoffset: 251.32741228718345;
       }
       to {
-        stroke-dashoffset: 25.665014275610705;
+        stroke-dashoffset: 9.34006929611534;
       }
     }
   
@@ -368,7 +368,7 @@ exports[`Test /api contract > should match the public happy-path response snapsh
         stroke-dashoffset: 251.32741228718345;
       }
       to {
-        stroke-dashoffset: 25.665014275610705;
+        stroke-dashoffset: 9.34006929611534;
       }
     }
   
@@ -544,7 +544,7 @@ exports[`Test /api contract > should match the public many-params response snaps
         stroke-dashoffset: 251.32741228718345;
       }
       to {
-        stroke-dashoffset: 26.378312814443284;
+        stroke-dashoffset: 9.550400916540333;
       }
     }
   

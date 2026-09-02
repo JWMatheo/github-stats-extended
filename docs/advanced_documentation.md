@@ -16,7 +16,7 @@
 > By default, the stats card only shows statistics like stars, commits, and pull requests from public repositories. To show private statistics on the stats card, [allow GitHub-Stats-Extended to access your private contributions](fork.md#private-contributions-support) or [deploy your own instance](deploy.md).
 
 > [!NOTE]
-> This personal fork keeps the upstream percentile formula but uses custom display thresholds: S (top 1%), A+ (40%), A (43%), A- (46%), B+ (50%), B (62.5%), B- (75%), C+ (87.5%) and C (everyone). The percentile is calculated as a weighted sum of commits, pull requests, reviews, issues, stars, and followers. The implementation is in [calculateRank.ts](https://github.com/JWMatheo/github-stats-extended/blob/master/packages/core/src/calculateRank.ts). The circle around the rank still shows 100 minus the unchanged percentile.
+> This personal fork keeps the upstream percentile formula but uses custom display thresholds: S (top 1%), A+ (40%), A (43%), A- (46%), B+ (50%), B (62.5%), B- (75%), C+ (87.5%) and C (everyone). The percentile is calculated as a weighted sum of commits, pull requests, reviews, issues, stars, and followers. The implementation is in [calculateRank.ts](https://github.com/JWMatheo/github-stats-extended/blob/master/packages/core/src/calculateRank.ts). For rendering, the raw percentile is mapped within its custom grade band to the equivalent canonical grade band, so the progress circle stays visually consistent with the displayed grade.
 
 ### Hiding individual stats
 

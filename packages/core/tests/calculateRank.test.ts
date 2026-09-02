@@ -50,7 +50,10 @@ describe("Test calculateRank", () => {
         stars: 50,
         followers: 10,
       }),
-    ).toStrictEqual({ level: "B+", percentile: approxNumber(46.09375) });
+    ).toStrictEqual({
+      level: "B+",
+      percentile: approxNumber(37.79296875),
+    });
   });
 
   it("average user gets B+ rank (include_all_commits)", () => {
@@ -65,7 +68,10 @@ describe("Test calculateRank", () => {
         stars: 50,
         followers: 10,
       }),
-    ).toStrictEqual({ level: "B+", percentile: approxNumber(46.09375) });
+    ).toStrictEqual({
+      level: "B+",
+      percentile: approxNumber(37.79296875),
+    });
   });
 
   it("advanced user gets A+ rank with the personal-fork calibration", () => {
@@ -82,7 +88,7 @@ describe("Test calculateRank", () => {
       }),
     ).toStrictEqual({
       level: "A+",
-      percentile: approxNumber(20.841471354166664),
+      percentile: approxNumber(6.850690271100427),
     });
   });
 
@@ -100,7 +106,7 @@ describe("Test calculateRank", () => {
       }),
     ).toStrictEqual({
       level: "A+",
-      percentile: approxNumber(5.575988339442828),
+      percentile: approxNumber(2.349329894963911),
     });
   });
 
